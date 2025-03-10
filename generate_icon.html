@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate DM Icon</title>
+</head>
+<body>
+    <canvas id="icon48" width="48" height="48" style="border:1px solid #000;"></canvas>
+    <canvas id="icon128" width="128" height="128" style="border:1px solid #000;"></canvas>
+    <script>
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            
+            // 设置背景色
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(0, 0, size, size);
+            
+            // 设置文字样式
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `bold ${size * 0.4}px Arial`;
+            
+            // 绘制文字
+            ctx.fillText('DM', size/2, size/2);
+        }
+
+        // 绘制两种尺寸的图标
+        drawIcon(document.getElementById('icon48'), 48);
+        drawIcon(document.getElementById('icon128'), 128);
+
+        // 将图标保存为 PNG 文件
+        setTimeout(() => {
+            const link = document.createElement('a');
+            link.download = 'icon.png';
+            link.href = document.getElementById('icon48').toDataURL();
+            link.click();
+        }, 1000);
+    </script>
+</body>
+</html>

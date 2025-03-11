@@ -1,7 +1,21 @@
+let baseUrl = 'https://dm-server-three.vercel.app';
+
+// 从存储中加载 baseUrl
+chrome.storage.sync.get({ baseUrl: 'https://dm-server-three.vercel.app' }, (items) => {
+    baseUrl = items.baseUrl;
+});
+
+// 监听存储变化
+chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'sync' && changes.baseUrl) {
+        baseUrl = changes.baseUrl.newValue;
+    }
+});
+
 // 处理获取弹幕的请求
 async function getDanmaku(cid) {
     try {
-        const response = await fetch('http://127.0.0.1:8080/x/v1/dm/list.so?cid='+cid, {
+        const response = await fetch(baseUrl + '/api/x_v1_dm_list.so?cid='+cid, {
             method: 'GET',
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -55,7 +69,7 @@ async function handleVideoLink(url) {
         console.log('提取到的BV号:', bvid);
 
         // 请求视频信息API
-        const response = await fetch('http://127.0.0.1:8080/x/player/pagelist?bvid='+bvid, {
+        const response = await fetch(baseUrl + '/api/x_player_pagelist?bvid='+bvid, {
             method: 'GET',
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',

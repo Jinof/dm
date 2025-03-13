@@ -12,7 +12,13 @@
 2. 开启`开发者模式`
 3. 选择`加载已解压的扩展程序`
 4. 选择 dm 文件夹
-## 启动 dm-server
+## 启动 dm-server (Optional)
+dm-server 用于转发获取弹幕请求, 目前已经内置了 vercel 服务端, 可直接使用, 也可自行搭建. 目前有以下三种部署方式.
+### 通过 vercel 部署
+<a href="https://vercel.com/new/clone?repository-url=https://github.com/Jinof/dm-server">
+  <img src="https://vercel.com/button" alt="Deploy with Vercel" />
+</a>
+
 ### 通过打包好的 release 启动
 1. 打开 [https://github.com/Jinof/dm-server/releases](https://github.com/Jinof/dm-server/releases), 下载对应版本的 dm-server
 2. 在命令行执行 `./dm-server` 

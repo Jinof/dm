@@ -21,7 +21,6 @@ function initializePlugin() {
           color: #FF69B4;
           font-size: 14px;
           overflow-y: auto;
-          cursor: move;
           z-index: 999999;
           display: flex;
           flex-direction: column;
@@ -31,6 +30,15 @@ function initializePlugin() {
           gap: 5px;
           margin-bottom: 10px;
           flex-shrink: 0;
+          align-items: center;
+        }
+        #danmaku-input-container::before {
+          content: "⋮⋮";
+          font-size: 16px;
+          color: #FF69B4;
+          cursor: move;
+          padding: 0 5px;
+          class: "drag-handle";
         }
         #danmaku-input {
           flex: 1;
@@ -67,6 +75,8 @@ function initializePlugin() {
     const floatingWindow = document.createElement('div');
     floatingWindow.id = 'danmaku-window';
 
+    // 移除标题栏相关代码
+
     // 创建输入框容器
     const inputContainer = document.createElement('div');
     inputContainer.id = 'danmaku-input-container';
@@ -86,6 +96,53 @@ function initializePlugin() {
     const danmakuContent = document.createElement('div');
     danmakuContent.id = 'danmaku-content';
 
+    // 添加拖拽功能
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    floatingWindow.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+
+    function dragStart(e) {
+        console.log('dragStart', e);
+        initialX = e.clientX - xOffset;
+        initialY = e.clientY - yOffset;
+        if (e.target === inputContainer) {
+            isDragging = true;
+        }
+    }
+
+    function drag(e) {
+        console.log('drag', e, floatingWindow)
+        if (isDragging) {
+            e.preventDefault();
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+
+            xOffset = currentX;
+            yOffset = currentY;
+
+            setTranslate(currentX, currentY, floatingWindow);
+        }
+    }
+
+    function dragEnd(e) {
+        console.log('dragEnd', e)
+        initialX = currentX;
+        initialY = currentY;
+        isDragging = false;
+    }
+
+    function setTranslate(xPos, yPos, el) {
+        el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+    }
+
     // 组装悬浮窗
     inputContainer.appendChild(input);
     inputContainer.appendChild(submit);
@@ -100,19 +157,19 @@ function initializePlugin() {
             chrome.runtime.sendMessage({ type: 'getDanmaku', url: url }, async (response) => {
                 if (response.success) {
                     const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(response.data, 'text/xml');
-        const danmakuElements = xmlDoc.getElementsByTagName('d');
-        const danmakuList = Array.from(danmakuElements).map(element => {
-            const attributes = element.getAttribute('p').split(',');
-            return {
-                time: parseFloat(attributes[0]),
-                type: parseInt(attributes[1]),
-                size: parseInt(attributes[2]),
-                color: `#${parseInt(attributes[3]).toString(16)}`,
-                timestamp: new Date(parseInt(attributes[4]) * 1000),
-                content: element.textContent
-            };
-        }).sort((a, b) => a.time - b.time);
+                    const xmlDoc = parser.parseFromString(response.data, 'text/xml');
+                    const danmakuElements = xmlDoc.getElementsByTagName('d');
+                    const danmakuList = Array.from(danmakuElements).map(element => {
+                        const attributes = element.getAttribute('p').split(',');
+                        return {
+                            time: parseFloat(attributes[0]),
+                            type: parseInt(attributes[1]),
+                            size: parseInt(attributes[2]),
+                            color: `#${parseInt(attributes[3]).toString(16)}`,
+                            timestamp: new Date(parseInt(attributes[4]) * 1000),
+                            content: element.textContent
+                        };
+                    }).sort((a, b) => a.time - b.time);
                     console.log('成功获取到弹幕数据，总数:', danmakuList.length);
 
                     // 获取视频播放器元素
@@ -126,7 +183,7 @@ function initializePlugin() {
 
                     // 监听视频时间更新事件
                     videoElement.addEventListener('timeupdate', () => {
-            // 兼容YouTube播放器时间更新事件
+                        // 兼容YouTube播放器时间更新事件
                         const currentTime = videoElement.currentTime;
 
                         // 查找当前时间点的弹幕
